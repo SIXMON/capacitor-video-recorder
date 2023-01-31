@@ -62,9 +62,9 @@ var capacitorVideoRecorderPlugin = (function (exports, core) {
             });
             this.previewFrameConfigs = [];
             this.currentFrameConfig = new FrameConfig({ id: 'default' });
+            this.videoElement = document.createElement('video');
         }
         _initializeCameraView() {
-            this.videoElement = document.createElement('video');
             this.videoElement.autoplay = true;
             this.videoElement.hidden = true;
             this.videoElement.style.cssText = `
@@ -76,21 +76,26 @@ var capacitorVideoRecorderPlugin = (function (exports, core) {
             this._updateCameraView(this.currentFrameConfig);
         }
         _updateCameraView(config) {
+            if (!config)
+                return;
             this.videoElement.style.width = config.width === 'fill' ? '100vw' : `${config.width}px`;
             this.videoElement.style.height = config.height === 'fill' ? '100vh' : `${config.height}px`;
             this.videoElement.style.left = `${config.x}px`;
             this.videoElement.style.top = `${config.y}px`;
             this.videoElement.style.zIndex = config.stackPosition === 'back' ? '-1' : '99999';
             this.videoElement.style.borderRadius = `${config.borderRadius}px`;
-            this.videoElement.style.boxShadow = `0 0 ${config.dropShadow.radius}px 0 rgba(${config.dropShadow.color}, ${config.dropShadow.opacity})`;
+            if (config.dropShadow) {
+                this.videoElement.style.boxShadow = `0 0 ${config.dropShadow.radius}px 0 rgba(${config.dropShadow.color}, ${config.dropShadow.opacity})`;
+            }
         }
         async initialize(options) {
+            var _a;
             console.warn('VideoRecorder: Web implementation is currently for mock purposes only, recording is not available');
-            let previewFrames = options.previewFrames.length > 0 ? options.previewFrames : [{ id: 'default' }];
+            let previewFrames = ((options === null || options === void 0 ? void 0 : options.previewFrames) && ((_a = options === null || options === void 0 ? void 0 : options.previewFrames) === null || _a === void 0 ? void 0 : _a.length) > 0) ? options === null || options === void 0 ? void 0 : options.previewFrames : [{ id: 'default' }];
             this.previewFrameConfigs = previewFrames.map(config => new FrameConfig(config));
             this.currentFrameConfig = this.previewFrameConfigs[0];
             this._initializeCameraView();
-            if (options.autoShow !== false) {
+            if ((options === null || options === void 0 ? void 0 : options.autoShow) !== false) {
                 this.videoElement.hidden = false;
             }
             if (navigator.mediaDevices.getUserMedia) {
@@ -100,10 +105,11 @@ var capacitorVideoRecorderPlugin = (function (exports, core) {
             return Promise.resolve();
         }
         destroy() {
+            var _a;
             this.videoElement.remove();
             this.previewFrameConfigs = [];
             this.currentFrameConfig = undefined;
-            this.stream.getTracks().forEach(track => track.stop());
+            (_a = this.stream) === null || _a === void 0 ? void 0 : _a.getTracks().forEach(track => track.stop());
             return Promise.resolve();
         }
         flipCamera() {
@@ -126,6 +132,7 @@ var capacitorVideoRecorderPlugin = (function (exports, core) {
             return Promise.resolve();
         }
         editPreviewFrameConfig(config) {
+            var _a;
             if (this.videoElement) {
                 if (!config.id) {
                     return Promise.reject('id required');
@@ -138,7 +145,7 @@ var capacitorVideoRecorderPlugin = (function (exports, core) {
                 else {
                     this.addPreviewFrameConfig(config);
                 }
-                if (this.currentFrameConfig.id == config.id) {
+                if (((_a = this.currentFrameConfig) === null || _a === void 0 ? void 0 : _a.id) == config.id) {
                     this.currentFrameConfig = updatedFrame;
                     this._updateCameraView(this.currentFrameConfig);
                 }
@@ -183,6 +190,7 @@ var capacitorVideoRecorderPlugin = (function (exports, core) {
         getDuration() {
             return Promise.resolve({ value: 0 });
         }
+        //@ts-ignore
         addListener() {
             console.warn('VideoRecorder: No web mock available for addListener');
         }

@@ -19,9 +19,9 @@ declare class FrameConfig {
 }
 export declare class VideoRecorderWeb extends WebPlugin implements VideoRecorderPlugin {
     videoElement: HTMLVideoElement;
-    stream: MediaStream;
+    stream: MediaStream | undefined;
     previewFrameConfigs: FrameConfig[];
-    currentFrameConfig: FrameConfig;
+    currentFrameConfig: FrameConfig | undefined;
     constructor();
     private _initializeCameraView;
     private _updateCameraView;
